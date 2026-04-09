@@ -3,4 +3,4 @@ AGENTS.md
 data/**
 !data/
 
-config/config.local.json
+config/config.json
