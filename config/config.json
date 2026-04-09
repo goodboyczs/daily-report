@@ -1,26 +1,16 @@
 {
-  "author_email": "cui-zhsh@neusoft.com",
-  "author_name": "cui-zhsh",
-  "output_dir": "C:\\Users\\Administrator\\Desktop\\daily-report\\data",
+  "author_email": "",
+  "author_name": "",
+  "output_dir": "",
   "scheduler": {
     "enabled": true,
     "interval": 0.5
   },
   "repositories": [
     {
-      "path": "D:\\app-clinnis",
-      "name": "app-clinnis",
-      "branch": "develop-core"
-    },
-    {
-      "path": "D:\\app-wis",
-      "name": "app-wis",
-      "branch": "develop-core"
-    },
-    {
-      "path": "D:\\app-wis-i18n\\app-wis",
-      "name": "app-wis",
-      "branch": "develop-i18n"
+      "path": "",
+      "name": "",
+      "branch": ""
     }
   ]
 }
