@@ -1,0 +1,16 @@
+{
+  "author_email": "your-email@company.com",
+  "output_dir": "C:\\Users\\YourName\\Desktop\\daily-report",
+  "repositories": [
+    {
+      "path": "D:\\your-project-a",
+      "name": "project-a",
+      "branch": "develop"
+    },
+    {
+      "path": "D:\\your-project-b",
+      "name": "project-b",
+      "branch": "main"
+    }
+  ]
+}

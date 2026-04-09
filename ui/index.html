@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Reporter</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- 侧边栏导航 -->
+      <aside class="sidebar">
+        <div class="logo">
+          <i class="fas fa-file-alt"></i>
+          <span>Daily Reporter</span>
+        </div>
+        <nav class="nav-menu">
+          <a href="#dashboard" class="nav-item" data-view="dashboard">
+            <i class="fas fa-home"></i>
+            <span>仪表盘</span>
+          </a>
+          <a href="#repositories" class="nav-item" data-view="repositories">
+            <i class="fas fa-folder"></i>
+            <span>仓库管理</span>
+          </a>
+          <a href="#reports" class="nav-item active" data-view="reports">
+            <i class="fas fa-chart-bar"></i>
+            <span>日报查看</span>
+          </a>
+          <a href="#statistics" class="nav-item" data-view="statistics">
+            <i class="fas fa-line-chart"></i>
+            <span>代码统计</span>
+          </a>
+          <a href="#scheduler" class="nav-item" data-view="scheduler">
+            <i class="fas fa-clock"></i>
+            <span>定时任务</span>
+          </a>
+          <a href="#settings" class="nav-item" data-view="settings">
+            <i class="fas fa-cog"></i>
+            <span>配置设置</span>
+          </a>
+          <a href="#about" class="nav-item" data-view="about">
+            <i class="fas fa-info-circle"></i>
+            <span>关于</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- 主内容区 -->
+      <main class="main-content">
+        <!-- 仪表盘 -->
+        <div id="dashboard" class="view-panel">
+          <div class="page-header">
+            <h1>仪表盘</h1>
+            <p>快速操作 Daily Report 生成工具</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <!-- 快速操作卡片 -->
+            <div class="card action-card">
+              <div class="card-header">
+                <i class="fas fa-sync-alt"></i>
+                <h3>更新今日日报</h3>
+              </div>
+              <div class="card-body">
+                <p>生成或更新最近一天的提交日报</p>
+                <button class="btn btn-primary" id="btn-update">
+                  <i class="fas fa-play"></i> 立即执行
+                </button>
+              </div>
+              <div class="card-footer">
+                <small>执行脚本: update.cmd</small>
+              </div>
+            </div>
+
+            <!-- 初始化卡片 -->
+            <div class="card action-card">
+              <div class="card-header">
+                <i class="fas fa-database"></i>
+                <h3>初始化历史</h3>
+              </div>
+              <div class="card-body">
+                <p>从Git历史中生成完整的日报（会覆盖现有报告）</p>
+                <button class="btn btn-warning" id="btn-init">
+                  <i class="fas fa-exclamation-triangle"></i> 执行 (谨慎)
+                </button>
+              </div>
+              <div class="card-footer">
+                <small>执行脚本: init.cmd</small>
+              </div>
+            </div>
+
+            <!-- 添加仓库卡片 -->
+            <div class="card action-card">
+              <div class="card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h3>添加新仓库</h3>
+              </div>
+              <div class="card-body">
+                <p>交互式添加新的项目仓库监听</p>
+                <button class="btn btn-success" id="btn-add">
+                  <i class="fas fa-plus"></i> 打开向导
+                </button>
+              </div>
+              <div class="card-footer">
+                <small>执行脚本: add.cmd</small>
+              </div>
+            </div>
+
+            <!-- 状态卡片 -->
+            <div class="card status-card">
+              <div class="card-header">
+                <i class="fas fa-info-circle"></i>
+                <h3>当前状态</h3>
+              </div>
+              <div class="card-body">
+                <div class="status-item">
+                  <span>仓库数量:</span>
+                  <strong id="repo-count">-</strong>
+                </div>
+                <div class="status-item">
+                  <span>配置作者:</span>
+                  <strong id="author-email">-</strong>
+                </div>
+                <div class="status-item">
+                  <span>输出目录:</span>
+                  <strong id="output-dir">-</strong>
+                </div>
+                <div class="status-item">
+                  <span>上次更新:</span>
+                  <strong id="last-update">-</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 命令执行反馈 -->
+          <div class="card" style="margin-top: 20px">
+            <div class="card-header">
+              <i class="fas fa-terminal"></i>
+              <h3>执行日志</h3>
+            </div>
+            <div class="card-body">
+              <div id="execution-log" class="log-container">
+                <p class="log-text log-info">等待执行命令...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 仓库管理 -->
+        <div id="repositories" class="view-panel">
+          <div class="page-header">
+            <h1>仓库管理</h1>
+            <p>管理监听的 Git 仓库列表</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>配置的仓库</h3>
+              <button
+                class="btn btn-sm btn-primary"
+                id="btn-add-repo"
+                style="margin-left: auto"
+              >
+                <i class="fas fa-plus"></i> 添加仓库
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="repositories-list" class="repositories-list">
+                <!-- 动态加载仓库列表 -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 日报查看 -->
+        <div id="reports" class="view-panel active">
+          <div class="page-header">
+            <h1>日报查看</h1>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div
+                style="
+                  margin-left: auto;
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                "
+              >
+                <select
+                  id="report-file-selector"
+                  class="form-control"
+                  style="width: 250px"
+                >
+                  <option value="">加载中...</option>
+                </select>
+                <button class="btn btn-sm btn-primary" id="btn-refresh-report">
+                  <i class="fas fa-redo"></i> 刷新
+                </button>
+                <button class="btn btn-sm btn-success" id="btn-open-supplement">
+                  <i class="fas fa-plus-circle"></i> 补充
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="report-content" class="report-viewer markdown-body">
+                <p class="text-muted">选择日报文件查看内容...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 补充信息弹窗 -->
+        <div class="modal" id="supplement-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2><i class="fas fa-plus-circle"></i> 补充信息</h2>
+              <button class="modal-close" id="supplement-modal-close">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="supplement-editor">
+                <div class="form-group" style="margin-bottom: 12px">
+                  <label>选择日期</label>
+                  <input
+                    type="date"
+                    id="remark-date-input"
+                    class="form-control"
+                  />
+                </div>
+                <textarea
+                  id="remark-input"
+                  class="form-control supplement-textarea"
+                  rows="5"
+                  placeholder="输入补充信息，内容将添加到该日期日报中..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" id="btn-close-supplement">
+                <i class="fas fa-times"></i> 关闭
+              </button>
+              <button class="btn btn-danger" id="btn-clear-remark">
+                <i class="fas fa-trash"></i> 清除补充
+              </button>
+              <button class="btn btn-primary" id="btn-save-remark">
+                <i class="fas fa-save"></i> 保存补充
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 代码统计 -->
+        <div id="statistics" class="view-panel">
+          <div class="page-header">
+            <h1>代码统计</h1>
+            <p>查看按日、按月、按年的代码修改统计数据</p>
+          </div>
+
+          <!-- 统计标签页 -->
+          <div class="card">
+            <div class="card-header" style="padding: 0">
+              <div class="stats-tabs">
+                <button class="stats-tab active" data-tab="by-day">
+                  <i class="fas fa-calendar-day"></i> 日
+                </button>
+                <button class="stats-tab" data-tab="by-month">
+                  <i class="fas fa-calendar"></i> 月
+                </button>
+                <button class="stats-tab" data-tab="by-year">
+                  <i class="fas fa-chart-bar"></i> 年
+                </button>
+              </div>
+            </div>
+
+            <!-- 按日统计 -->
+            <div id="tab-by-day" class="stats-tab-content active">
+              <div class="card-body">
+                <div class="stats-filters">
+                  <div class="filter-group">
+                    <label>选择月份:</label>
+                    <select
+                      id="day-month-select"
+                      class="form-control"
+                      style="width: 200px"
+                    >
+                      <option value="">加载中...</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label>仓库:</label>
+                    <select
+                      id="day-repo-filter"
+                      class="form-control"
+                      style="width: 250px"
+                    >
+                      <option value="">全部仓库</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="stats-summary" style="margin-top: 20px">
+                  <div class="summary-item">
+                    <span class="label">月新增:</span>
+                    <span class="value" id="day-total-additions">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">月删除:</span>
+                    <span class="value" id="day-total-deletions">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">修改文件数:</span>
+                    <span class="value" id="day-total-files">-</span>
+                  </div>
+                </div>
+
+                <h3 style="margin-top: 30px">代码修改趋势</h3>
+                <div
+                  id="chart-container"
+                  style="height: 400px; padding: 20px; position: relative"
+                >
+                  <canvas id="stats-chart"></canvas>
+                </div>
+
+                <h3 style="margin-top: 30px">每日详细数据</h3>
+                <div
+                  id="day-table-container"
+                  class="table-responsive"
+                  style="margin-top: 15px"
+                >
+                  <table class="stats-table">
+                    <thead>
+                      <tr>
+                        <th>日期</th>
+                        <th>仓库</th>
+                        <th>分支</th>
+                        <th>新增行数</th>
+                        <th>删除行数</th>
+                        <th>变化总数</th>
+                        <th>修改文件</th>
+                      </tr>
+                    </thead>
+                    <tbody id="day-table-body">
+                      <tr>
+                        <td colspan="7" class="text-center text-muted">
+                          请选择月份
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 按月统计 -->
+            <div id="tab-by-month" class="stats-tab-content">
+              <div class="card-body">
+                <div class="stats-filters">
+                  <div class="filter-group">
+                    <button class="btn btn-primary" id="btn-reload-months">
+                      <i class="fas fa-sync-alt"></i> 刷新数据
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  id="month-chart-container"
+                  style="
+                    height: 300px;
+                    padding: 10px 0 20px;
+                    position: relative;
+                  "
+                >
+                  <canvas id="month-chart"></canvas>
+                </div>
+
+                <h3 style="margin-top: 10px">所有已归档月份统计</h3>
+                <div
+                  id="month-table-container"
+                  class="table-responsive"
+                  style="margin-top: 15px"
+                >
+                  <table class="stats-table">
+                    <thead>
+                      <tr>
+                        <th>月份</th>
+                        <th>新增行数</th>
+                        <th>删除行数</th>
+                        <th>变化总数</th>
+                        <th>修改文件</th>
+                        <th>有数据的天数</th>
+                      </tr>
+                    </thead>
+                    <tbody id="month-table-body">
+                      <tr>
+                        <td colspan="6" class="text-center text-muted">
+                          加载中...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 按年统计 -->
+            <div id="tab-by-year" class="stats-tab-content">
+              <div class="card-body">
+                <div
+                  id="year-chart-container"
+                  style="
+                    height: 300px;
+                    padding: 10px 0 20px;
+                    position: relative;
+                  "
+                >
+                  <canvas id="year-chart"></canvas>
+                </div>
+
+                <h3 style="margin-top: 10px">按年统计汇总</h3>
+                <div
+                  id="year-table-container"
+                  class="table-responsive"
+                  style="margin-top: 15px"
+                >
+                  <table class="stats-table">
+                    <thead>
+                      <tr>
+                        <th>年份</th>
+                        <th>新增行数</th>
+                        <th>删除行数</th>
+                        <th>变化总数</th>
+                        <th>修改文件</th>
+                        <th>有数据的月数</th>
+                      </tr>
+                    </thead>
+                    <tbody id="year-table-body">
+                      <tr>
+                        <td colspan="6" class="text-center text-muted">
+                          加载中...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 配置设置 -->
+        <div id="settings" class="view-panel">
+          <div class="page-header">
+            <h1>配置设置</h1>
+            <p>编辑项目配置文件</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>config.json 编辑器</h3>
+              <div style="margin-left: auto; display: flex; gap: 10px">
+                <button class="btn btn-sm btn-success" id="btn-save-config">
+                  <i class="fas fa-save"></i> 保存
+                </button>
+                <button class="btn btn-sm btn-secondary" id="btn-reset-config">
+                  <i class="fas fa-undo"></i> 重置
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="config-editor">
+                <div class="form-group">
+                  <label>作者邮箱 (author_email)</label>
+                  <input
+                    type="email"
+                    id="input-author-email"
+                    class="form-control"
+                    placeholder="your@email.com"
+                  />
+                  <small class="form-text"
+                    >必须与 git config user.email 一致</small
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>输出目录 (output_dir)</label>
+                  <input
+                    type="text"
+                    id="input-output-dir"
+                    class="form-control"
+                    placeholder="C:\path\to\reports"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>仓库配置 (JSON)</label>
+                  <textarea
+                    id="input-repositories"
+                    class="form-control"
+                    rows="10"
+                    style="font-family: monospace"
+                  ></textarea>
+                  <small class="form-text"
+                    >JSON 格式: [{"path": "D:\project", "name": "project",
+                    "branch": "main"}]</small
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>⏰ 定时任务配置</label>
+                  <div style="display: flex; gap: 10px; align-items: center">
+                    <label style="display: flex; align-items: center; gap: 5px">
+                      <input type="checkbox" id="input-scheduler-enabled" />
+                      启用定时任务
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>执行间隔（小时）</label>
+                  <input
+                    type="number"
+                    id="input-scheduler-interval"
+                    class="form-control"
+                    placeholder="0.5"
+                    min="0.1"
+                    step="0.5"
+                  />
+                  <small class="form-text"
+                    >每隔多少小时执行一次 update 脚本（支持小数，如 0.5 表示 30
+                    分钟）</small
+                  >
+                </div>
+              </div>
+
+              <hr style="margin: 30px 0" />
+
+              <div
+                class="card-header"
+                style="
+                  background: none;
+                  padding: 0 0 10px 0;
+                  border-bottom: 1px solid #ddd;
+                "
+              >
+                <h3 style="margin: 0">完整配置 (JSON)</h3>
+              </div>
+              <textarea
+                id="config-raw"
+                class="form-control"
+                rows="15"
+                style="font-family: monospace; margin-top: 10px"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 定时任务 -->
+        <div id="scheduler" class="view-panel">
+          <div class="page-header">
+            <h1>定时任务</h1>
+            <p>管理和监控自动更新定时任务</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>定时任务控制</h3>
+            </div>
+            <div class="card-body">
+              <div
+                id="scheduler-status"
+                class="status-item"
+                style="margin-bottom: 20px"
+              >
+                <div
+                  style="padding: 10px; background: #f5f5f5; border-radius: 4px"
+                >
+                  <p><strong>加载中...</strong></p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px">
+                <button class="btn btn-primary" id="btn-scheduler-toggle">
+                  <i class="fas fa-play"></i> 启动定时任务
+                </button>
+                <button class="btn btn-success" id="btn-scheduler-execute">
+                  <i class="fas fa-bolt"></i> 立即执行
+                </button>
+                <button class="btn btn-secondary" id="btn-scheduler-clear-logs">
+                  <i class="fas fa-trash"></i> 清空日志
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 20px">
+            <div class="card-header">
+              <h3>执行日志</h3>
+              <div
+                style="
+                  margin-left: auto;
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                "
+              >
+                <small style="color: #666">最新的记录在上面</small>
+                <button
+                  class="btn btn-sm btn-primary"
+                  id="btn-scheduler-refresh-logs"
+                >
+                  <i class="fas fa-redo"></i> 刷新日志
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div
+                id="scheduler-logs"
+                class="log-container"
+                style="
+                  height: 400px;
+                  overflow-y: auto;
+                  background: #1e1e1e;
+                  color: #00ff41;
+                  padding: 15px;
+                  border-radius: 4px;
+                  font-family: &quot;Courier New&quot;, monospace;
+                  font-size: 12px;
+                  line-height: 1.5;
+                  white-space: pre-wrap;
+                  word-break: break-word;
+                  border: 1px solid #333;
+                  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+                  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+                "
+              >
+                加载中...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 关于页面 -->
+        <div id="about" class="view-panel">
+          <div class="page-header">
+            <h1>关于</h1>
+            <p>Daily Report Generator - 自动日报生成工具</p>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <h3>📋 Daily Report Generator</h3>
+              <p>
+                一个轻量级的 Node.js 脚本，用于从 Git 仓库自动生成团队日报。
+              </p>
+
+              <h4>✨ 主要功能</h4>
+              <ul>
+                <li>✅ 多仓库支持 - 监听多个 Git 仓库</li>
+                <li>✅ 多分支支持 - 同名仓库的不同分支可独立配置</li>
+                <li>✅ 自动聚合 - 同一任务 ID 的提交自动合并</li>
+                <li>
+                  ✅ 灵活过滤 - 按 author email、commit message pattern 过滤
+                </li>
+                <li>✅ 零依赖 - 原生 Node.js，无外部包依赖</li>
+              </ul>
+
+              <h4>📁 目录结构</h4>
+              <pre><code>daily-report/
+├── ui/                    # 🌐 Web UI 界面
+│   ├── index.html
+│   └── assets/
+├── scripts/               # 🔧 核心脚本
+│   ├── update.js
+│   ├── init.js
+│   └── add.js
+├── config/                # ⚙️ 配置文件
+│   ├── config.json        # 必须编辑
+│   └── config.example.json
+├── data/                  # 📊 生成的报告
+│   └── reports.md
+├── utils/                 # 🛠 工具库
+└── docs/                  # 📚 文档</code></pre>
+
+              <h4>🚀 快速开始</h4>
+              <ol>
+                <li>
+                  编辑 <code>config/config.json</code> 填写作者邮箱和仓库配置
+                </li>
+                <li>点击仪表盘的"更新今日日报"生成日报</li>
+                <li>查看 <code>data/reports.md</code> 查看生成结果</li>
+              </ol>
+
+              <h4>ℹ️ 文档链接</h4>
+              <p>
+                📖 <a href="../README.md" target="_blank">完整文档</a> | ⚙️ 设置
+                tab 进行配置
+              </p>
+
+              <h4>📧 支持信息</h4>
+              <p>遇到问题? 检查以下几点:</p>
+              <ul>
+                <li>邮箱是否与 <code>git config user.email</code> 一致?</li>
+                <li>仓库路径是否存在且包含 <code>.git</code> 文件夹?</li>
+                <li>
+                  Commit message 是否以 <code>feat:</code> 或
+                  <code>bugfix:</code> 开头?
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 模态框 - 添加仓库 -->
+    <div id="modal-add-repo" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>添加新仓库</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>仓库路径</label>
+            <input
+              type="text"
+              id="modal-repo-path"
+              class="form-control"
+              placeholder="D:\project"
+            />
+          </div>
+          <div class="form-group">
+            <label>项目名称</label>
+            <input
+              type="text"
+              id="modal-repo-name"
+              class="form-control"
+              placeholder="project"
+            />
+          </div>
+          <div class="form-group">
+            <label>分支名称</label>
+            <input
+              type="text"
+              id="modal-repo-branch"
+              class="form-control"
+              placeholder="main"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="modal-close-btn">取消</button>
+          <button class="btn btn-primary" id="modal-add-btn">添加仓库</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 确认框 -->
+    <div id="confirm-dialog" class="confirm-modal" style="display: none">
+      <div class="confirm-content">
+        <h3 id="confirm-title"></h3>
+        <p id="confirm-message"></p>
+        <div class="confirm-footer">
+          <button class="btn btn-secondary" id="confirm-cancel">取消</button>
+          <button class="btn btn-danger" id="confirm-ok">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="assets/js/archive-stats.js"></script>
+    <script src="assets/js/stats-view.js"></script>
+  </body>
+</html>
